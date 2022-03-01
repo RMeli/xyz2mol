@@ -13,8 +13,8 @@ Implementation by Jan H. Jensen, based on the paper
 
 import copy
 import itertools
+import warnings
 
-from rdkit.Chem import rdmolops
 from rdkit.Chem import rdchem
 try:
     from rdkit.Chem import rdEHTTools #requires RDKit 2019.9.1 or later
@@ -27,7 +27,7 @@ import numpy as np
 import networkx as nx
 
 from rdkit import Chem
-from rdkit.Chem import AllChem, rdmolops
+from rdkit.Chem import AllChem
 import sys
 
 global __ATOM_LIST__
@@ -505,7 +505,11 @@ def AC2mol(mol, AC, atoms, charge, allow_charged_fragments=True,
         use_atom_maps=use_atom_maps)
 
     # If charge is not correct don't return mol
-    if Chem.GetFormalCharge(mol) != charge:
+    fcharge = Chem.GetFormalCharge(mol)
+    if fcharge != charge:
+        warnings.warn(
+            f"RDKit formal charge {fcharge} does not correspond to charge {charge}"
+        )
         return []
 
     # BO2mol returns an arbitrary resonance form. Let's make the rest
@@ -733,12 +737,6 @@ def xyz2mol(atoms, coordinates, charge=0, allow_charged_fragments=True,
             chiral_stereo_check(new_mol)
 
     return new_mols
-
-
-def main():
-
-
-    return
 
 
 if __name__ == "__main__":
